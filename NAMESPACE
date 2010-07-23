@@ -1,0 +1,13 @@
+# require(mvUtils)
+# importFrom(mvUtils,elements)
+
+export(
+     rav,          # Stima dei parametri del modello Averaging
+     rav.cmd,      # Interfaccia grafica per rav
+     averaging,    # Da parametri separati a osservazione per modello averaging
+     pargen,       # Genera dei parametri casuali per il modello averaging
+     rav.indexes,  # Calcola gli indici di fit
+     parameters    # Estrae i parametri del miglior modelo stimato
+    )
+exportClasses(rav)
+exportMethods(summary,show,fitted,residuals)
