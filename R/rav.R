@@ -185,8 +185,8 @@ rav.base <- function(data, lev, fact, dim.data, sumlev, pos, start, upper, lower
         upper.eq <- upper[pos.val]
         lower.eq <- lower[pos.val]
     } else {
-            upper.eq <- +inf
-            lower.eq <- -inf
+            upper.eq <- +Inf
+            lower.eq <- -Inf
         }
     rm(pos.val)
     

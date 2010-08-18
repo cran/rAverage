@@ -20,8 +20,8 @@
     \tabular{ll}{
         Package: \tab rAverage\cr
         Type: \tab Package\cr
-        Version: \tab 0.3-2\cr
-        Date: \tab 2010-07-28\cr
+        Version: \tab 0.3-3\cr
+        Date: \tab 2010-08-18\cr
         License: \tab GNU (version 2 or later)\cr
     }
     
@@ -92,7 +92,7 @@
     \code{\link[rAverage]{pargen}},
     \code{\link[rAverage]{rav.indexes}},
     \code{\link[rAverage]{rav.cmd}},
-    \code{\link[rAverage]{fmdata}},
+    \code{\link[rAverage]{fmdata1}},
     \code{\link[rAverage]{pasta}},
     \code{\link[stats]{optim}} 
 }

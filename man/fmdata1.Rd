@@ -1,5 +1,7 @@
-\name{fmdata}
-\alias{fmdata}
+\name{fmdata1}
+\alias{fmdata1}
+\alias{fmdata2}
+\alias{fmdata3}
 \docType{data}
 \title{rAverage dataset examples}
 \description{

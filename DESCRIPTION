@@ -1,6 +1,6 @@
 Package: rAverage
-Version: 0.3-2
-Date: 2010-07-28
+Version: 0.3-3
+Date: 2010-08-18
 Title: Parameter estimation for the Averaging model of Information
         Integration Theory
 Author: Giulio Vidotto <giulio.vidotto@unipd.it>, Stefano Noventa
@@ -15,6 +15,6 @@ Description: Parameter estimation for the Averaging model of Anderson's
         Information Integration Theory
 License: GPL (>= 2)
 URL: http://qplab.psy.unipd.it/
-Packaged: 2010-07-28 13:35:16 UTC; davide
 Repository: CRAN
-Date/Publication: 2010-07-29 09:02:21
+Date/Publication: 2010-08-18 21:19:24
+Packaged: 2010-08-18 06:59:27 UTC; Davide
