@@ -244,7 +244,7 @@ rav.base <- function(data, lev, fact, dim.data, sumlev, pos, start, upper, lower
         # Riconteggio del numero di parametri:
         case.start@n.pars <- par.base+numpar(case.start@param,sumlev[1])
         # Calcolo del nuovo RSS:
-        case.start@RSS <- Residual(case.start@param,fixed,data,lev,fact,dim.data,sumlev,delta.weights,nwfix)
+        case.start@RSS <- Residual(case.start@param,fixed,data,lev,fact,sumlev,dim.data,delta.weights,nwfix)
         # Nuova istanza di classe:
         output$par <- case.start@param
         output$value <- case.start@RSS
@@ -335,8 +335,9 @@ rav.sim <- function(data, lev, fact, dim.data, sumlev, pos, start, upper, lower,
     w.base <- which(w.base==max(w.base))[1]
     # Calcolo dei rapporti fra i pesi:
     par[,pos$wpos] <- par[,pos$wpos]/par[,w.base]
-    par.med[,1:sumlev[2]] <- colMeans(par[,1:sumlev[2]]) # media s
-    par.med[,(sumlev[2]+1):sumlev[3]] <- apply(par.med[,(sumlev[2]+1):sumlev[3]],2,median) # mediana w
+    par.med <- rep.int(NA,2+sumlev[1])
+    par.med[pos$slast] <- colMeans(par[,pos$slast]) # media s
+    par.med[pos$wpos] <- apply(par[,pos$wpos],2,median) # mediana w
     
     # Stima del nuovo modello:
     model <- rav.base(
