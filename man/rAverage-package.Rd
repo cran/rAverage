@@ -20,7 +20,7 @@
     \tabular{ll}{
         Package: \tab rAverage\cr
         Type: \tab Package\cr
-        Version: \tab 0.3-4\cr
+        Version: \tab 0.3-5\cr
         Date: \tab 2010-10-31\cr
         License: \tab GNU (version 2 or later)\cr
     }

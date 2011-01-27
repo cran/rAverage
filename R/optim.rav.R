@@ -36,14 +36,11 @@ Residual.eq <- function(param,fixed,data,lev,fact,sumlev,dim.data)
 
 optimization.IC <- function(
     data, fact, lev, sumlev, pos, N, dim.data,  # dati del disegno sperimentale
-    model.start,                                # modello di partenza
-    par.base, nwfix, fixed,                     # parametri e fissi
-    delta.weights, IC.diff, all,                # opzioni per la procedura di stima
-    lower, upper, method, control,              # opzioni per optim
-    change, verbose)
+    model.start, par.base, nwfix, fixed,        # modello di partenza, parametri e fissi
+    delta.weights, IC.diff, all, verbose,       # opzioni per la procedura di stima
+    lower, upper, method, control)              # opzioni per optim
 {   
-    # Contiene i parametri del modello di partenza per la routine
-    # di minimizzazione:
+    # Contiene i parametri del modello di partenza per la routine di minimizzazione:
     START <- list(
          param = model.start@param,
            RSS = model.start@RSS,
@@ -66,10 +63,11 @@ optimization.IC <- function(
     selected <- rep.int(FALSE,sumlev[1])
     # Indica la presenza dei bounds:
     bounds <- method=="L-BFGS-B"
+    logN <- log(N) # Serve per il calcolo del BIC
 
-    if (verbose) {
-        cat("Model selection by information criterion","\n","\n")
-        cat("-> start ","\t",
+    if(verbose) {
+        cat("Model selection by information criterion","\n\n")
+        cat("-> start \t",
             "RSS:",sprintf("%.2f",START$RSS),"\t",
             "BIC:",sprintf("%.2f",START$IC[1]),"\t",
             "AIC:",sprintf("%.2f",START$IC[2]),"\n"
@@ -77,13 +75,13 @@ optimization.IC <- function(
     }
 
     for(i in 1:sumlev[1]) {
-        if(verbose) cat("#",i,"free weights","\n")
-        
-        START$param[pos$fixed]<-fixed[pos$fixed]
+        if(verbose) cat("#",i,"free weights\n")
+        START$param[pos$fixed] <- fixed[pos$fixed]
         BEST$IC <- START$IC
-        accepted <- FALSE # Diventa TRUE se il nuovo modello sara' accettato
+        accepted <- FALSE # Diventa TRUE se uno dei nuovi modelli sara' accettato
+        decision <- " Refused" # Serve per verbose=T
         cc <- combin(sumlev[1],i) # Combinazioni di pesi
-        dim.cc<-dim(cc)
+        dim.cc <- dim(cc)
         # --------------------------------------
         # Fissaggio dei pesi
         # --------------------------------------
@@ -110,7 +108,7 @@ optimization.IC <- function(
             dim.cc[1] <- nrow(cc)
             # Se tutte le combinazioni sono state eliminate, o se le rimanenti hanno 
             # meno parametri di quanto indicato dalla i si salta al successivo ciclo.
-            if( length(cc)==0 | dim.cc[2]<i ) next
+            if(length(cc)==0 | dim.cc[2]<i) next
         }
         
         # --------------------------------------
@@ -130,6 +128,9 @@ optimization.IC <- function(
             dim.cc[1] <- nrow(cc)
         }
         
+        # --------------------------------------
+        # Stima per le date combinazioni
+        # --------------------------------------
         for(j in 1:dim.cc[1]) {
             # Fissaggio dei pesi:
             eachfixed <- fixed
@@ -139,7 +140,8 @@ optimization.IC <- function(
             output <- optim(par=START$param, fn=Residual,
                 fixed=eachfixed, data=data, lev=lev, fact=fact, sumlev=sumlev, dim.data=dim.data,
                 delta.weights=delta.weights, nwfix=nwfix[c(1,3)], method=method, lower=lower,
-                upper=upper, control=control)
+                upper=upper, control=control
+            )
             
             # Sostituzione dei parametri fissi a quelli in output:
             output$par[pos$fixed] <- fixed[pos$fixed]
@@ -151,24 +153,25 @@ optimization.IC <- function(
             # I pesi uguali entro un certo delta vengono eguagliati:
             output$par <- parmeanlast(output$par,fixed,sumlev,delta.weights,nwfix)
             
-            # Calcolo del numero di parametri
+            # Calcolo del numero di parametri:
             output$n.pars <- par.base+numpar(output$par[pos$wpos],sumlev[1])
             
             # Dato che i parametri potrebbero essere stati modificati si ricalcola l'RSS:
             output$value <- Residual(output$par,fixed,data,lev,fact,sumlev,dim.data,delta.weights,nwfix)
             # Calcolo degli indici AIC e BIC
             output$IC <- c(
-                N*log(output$value/N)+output$n.pars*log(N), # BIC
-                2*output$n.pars * (N/(N-output$n.pars-1)) + N*log(output$value/N) # AIC
+                N*log(output$value/N)+output$n.pars*logN, # BIC
+                N*log(output$value/N)+2*output$n.pars # AIC
             )
+            if(N/output$n.pars < 40) {
+                output$IC[1] <- output$IC[1]+(output$n.pars*logN*(output$n.pars+1))/(N-output$n.pars-1) # BICc
+                output$IC[2] <- output$IC[2]+(2*output$n.pars*(output$n.pars+1))/(N-output$n.pars-1) # AICc
+            }
             
-            # Valutazione del modello stimato
-            if(verbose) decision<-"refused "
-            if(
-                (output$IC[1]+IC.diff[1]<BEST$IC[1]) |
-                ((output$IC[1]<BEST$IC[1]) & (output$IC[2]+IC.diff[2]<BEST$IC[2]))
-            ) {
-                if(verbose) decision <- "accepted"
+            # Valutazione del modello stimato:
+            if((output$IC[1]+IC.diff[1]<BEST$IC[1]) |
+            ((output$IC[1]<BEST$IC[1]) & (output$IC[2]+IC.diff[2]<BEST$IC[2]))) {
+                # Il nuovo modello viene accettato come migliore:
                 BEST$param  <- output$par
                 BEST$RSS    <- output$value
                 BEST$IC     <- output$IC
@@ -176,11 +179,12 @@ optimization.IC <- function(
                 BEST$comb   <- cc[j,]
                 BEST$conv   <- output$convergence
                 BEST$msg    <- output$message
-                accepted    <- change <- TRUE
+                accepted    <- TRUE
+                decision <- "Accepted"
             }
             
             if(verbose) {
-                if (output$convergence==0)
+                if(output$convergence==0)
                     convergence <- "converged"
                 else
                     convergence <- "not converged"
@@ -190,9 +194,12 @@ optimization.IC <- function(
                     "AIC:",sprintf("%.2f",output$IC[2]),"\t",
                     decision,"\t", convergence,"\n"
                 )
+                decision <- " Refused"
             }
         }
         if(accepted) {
+            # Ultimata la combinazione di pesi j, il miglior modello diventa
+            # il modello di partenza per la successiva combinazione:
             START <- BEST
             selected[BEST$comb] <- TRUE
         }
@@ -201,7 +208,7 @@ optimization.IC <- function(
         cat("-> select","\t",
             "RSS:",round(START$RSS,2),  "\t",
             "BIC:",round(START$IC[1],2),"\t",
-            "AIC:",round(START$IC[2],2),"\n","\n"
+            "AIC:",round(START$IC[2],2),"\n\n"
         )
     
     return(
@@ -210,8 +217,7 @@ optimization.IC <- function(
             value = START$RSS,
             convergence = START$conv,
             message = START$msg,
-            n.pars = START$n.pars,
-            change = change
+            n.pars = START$n.pars
         )
     )
 }

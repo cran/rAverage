@@ -1,5 +1,5 @@
-rav <- function(data, subset=NULL, lev, all=FALSE, sim=0, start=NULL, lower=NULL, upper=NULL,
-    I0=FALSE, s.fixed=FALSE, w.fixed=FALSE, IC.diff=c(2.5,2.0), delta.weights=0.1,
+rav <- function(data, subset=NULL, lev, all=FALSE, sim=0, range=NULL, start=NULL, lower=NULL, upper=NULL,
+    I0=FALSE, s.fixed=FALSE, w.fixed=FALSE, IC.diff=c(2,2), delta.weights=0.1,
     method="L-BFGS-B", control=list(), title=NULL, names=NULL, verbose=FALSE)
 {
     # --------------------------------------
@@ -14,7 +14,6 @@ rav <- function(data, subset=NULL, lev, all=FALSE, sim=0, start=NULL, lower=NULL
     sumlev <- c(sumlev,2+sumlev,2+2*sumlev)
     fixed <- rep.int(NaN,sumlev[3]) # Vettore dei param fissi
     if(!I0) fixed[1:2] <- 0
-    #delta.weights <- delta.weights+0.001
     
     # Attribuzione dei valori di default a names:
     if(is.null(names)) names <- paste("Factor",LETTERS[1:fact])
@@ -43,8 +42,10 @@ rav <- function(data, subset=NULL, lev, all=FALSE, sim=0, start=NULL, lower=NULL
     }
     data <- as.matrix(data)
     dim.data <- dim(data) 
-    if(dim.data[2]==1) data <- t(data)
-    
+    if(dim.data[2]==1) {
+        data <- t(data)
+        dim.data <- dim(data)
+    }
     # Numero corretto di colonne della matrice di dati:
     all.resp <-
         .C("respdim",
@@ -58,7 +59,7 @@ rav <- function(data, subset=NULL, lev, all=FALSE, sim=0, start=NULL, lower=NULL
         if(dim.data[2] == (all.resp+1)) {
             data <- data[,-1]
             dim.data[2] <- dim.data[2]-1
-        } else stop("Error occurred in columns check\n")
+        } else stop("Error occurred in columns check")
     }
     
     # -----------------------------------------------
@@ -76,7 +77,7 @@ rav <- function(data, subset=NULL, lev, all=FALSE, sim=0, start=NULL, lower=NULL
     
     if(is.list(w.fixed)) {
         fixed[pos$wpos] <- unlist(w.fixed)
-        fixed[pos$wpos][which(fixed[pos$wpos]==0)]<-1e-10
+        fixed[pos$wpos][which(fixed[pos$wpos]==0)] <- 1e-10
     }
     
     pos$fixed <- which(!is.na(fixed))
@@ -100,9 +101,12 @@ rav <- function(data, subset=NULL, lev, all=FALSE, sim=0, start=NULL, lower=NULL
     # ----------------------------------
     # Start, lower, upper
     # ----------------------------------
-    
-    ran <- range(data,na.rm=TRUE)
-    middle <- mean(ran)
+    if(is.null(range)) {
+        range <- range(data,na.rm=TRUE)
+        range[1] <- floor(range[1])
+        range[2] <- ceiling(range[2])
+    }
+    middle <- mean(range)
     pos$fixed <- which(!is.na(fixed))
     
     if (is.null(start)) {
@@ -111,7 +115,7 @@ rav <- function(data, subset=NULL, lev, all=FALSE, sim=0, start=NULL, lower=NULL
             start$s <- c(start$s,rep.int(middle,lev[i]))
             start$w <- c(start$w,rep.int(1,lev[i]))
         }
-        if(any(is.na(start$I0))) start$I0 <- c(ran[1],1)
+        if(any(is.na(start$I0))) start$I0 <- c(range[1],1)
         start <- as.numeric(unlist(start))
     }
     start[pos$fixed]<-fixed[pos$fixed]
@@ -121,19 +125,19 @@ rav <- function(data, subset=NULL, lev, all=FALSE, sim=0, start=NULL, lower=NULL
         if (is.null(upper)) {
             upper <- list(s=NULL,w=NULL)
             for(i in 1:fact) {
-                upper$s <- c(upper$s,rep.int(ran[2],lev[i]))
+                upper$s <- c(upper$s,rep.int(range[2],lev[i]))
                 upper$w <- c(upper$w,rep.int(10,lev[i]))
             }
-        upper <- as.numeric(c(middle,ran[2]/10,unlist(upper)))
+        upper <- as.numeric(c(middle,range[2]/10,unlist(upper)))
         }
         # Lower -------
         if (is.null(lower)) {
             lower <- list(s=NULL,w=NULL)
             for(i in 1:fact) {
-                lower$s <- c(lower$s,rep.int(ran[1],lev[i]))
+                lower$s <- c(lower$s,rep.int(range[1],lev[i]))
                 lower$w <- c(lower$w,rep.int(1e-5,lev[i]))
             }
-            lower <- as.numeric(c(ran[1],1e-5,unlist(lower)))
+            lower <- as.numeric(c(range[1],1e-5,unlist(lower)))
         }
         if(!I0) {
             # Dato che s0=w0=0, bisogna assicurarsi che i
@@ -145,7 +149,6 @@ rav <- function(data, subset=NULL, lev, all=FALSE, sim=0, start=NULL, lower=NULL
         upper <- +Inf
         lower <- -Inf
         }
-    
     rm(all.resp,middle)
     
     # --------------------
@@ -161,7 +164,7 @@ rav <- function(data, subset=NULL, lev, all=FALSE, sim=0, start=NULL, lower=NULL
     else
         rav.sim(
             data=data, lev=lev, fact=fact, dim.data=dim.data, sumlev=sumlev, pos=pos,
-            start=start, upper=upper, lower=lower, range=ran, I0=I0, fixed=fixed,
+            start=start, upper=upper, lower=lower, range=range, I0=I0, fixed=fixed,
             s.fixed=s.fixed, nwfix=nwfix, sim=sim, delta.weights=delta.weights, all=all,
             IC.diff=IC.diff, method=method, control=control, names=names, title=title
         )
@@ -230,14 +233,9 @@ rav.base <- function(data, lev, fact, dim.data, sumlev, pos, start, upper, lower
     # INFORMATION CRITERION
     
     case.start <- case.equal
-    
-    # Indica se il modello di partenza e' stato modificato:
-    change <- FALSE
-    
-    # Se gli s o alcuni pesi sono stati fissati bisogna ricalcolare gli
+    # Se gli s o alcuni pesi sono stati fissati, bisogna ricalcolare gli
     # indici del modello di partenza:
     if(s.fixed | nwfix$num) {
-        change <- TRUE
         case.start@param[pos$fixed] <- fixed[pos$fixed]
         # Si eguagliano i pesi uguali entro delta.weights:
         case.start@param <- parmeanlast(case.start@param,fixed,sumlev,delta.weights,nwfix)
@@ -258,8 +256,8 @@ rav.base <- function(data, lev, fact, dim.data, sumlev, pos, start, upper, lower
     # Stima dei parametri:
     output <- optimization.IC(data=data, fact=fact, lev=lev, sumlev=sumlev, pos=pos, N=N,
         dim.data=dim.data, model.start=case.start, par.base=par.base, nwfix=nwfix,
-        fixed=fixed, delta.weights=delta.weights, IC.diff=IC.diff, all=all, lower=lower,
-        upper=upper, method=method, control=control, change=change, verbose=verbose)
+        fixed=fixed, delta.weights=delta.weights, IC.diff=IC.diff, all=all, verbose=verbose,
+        lower=lower, upper=upper, method=method, control=control)
     
     # Istanza di classe:
     case.IC <- fit.indexes(output=output, data=data, lev=lev, fact=fact, sumlev=sumlev,
@@ -267,22 +265,29 @@ rav.base <- function(data, lev, fact, dim.data, sumlev, pos, start, upper, lower
     
     # MODEL SELECTION
     
-    Aic <- c(case.equal@AIC,case.diff@AIC,case.IC@AIC)
-    Bic <- c(case.equal@BIC,case.diff@BIC,case.IC@BIC)
-    if(output$change==FALSE) {
-        Aic <- Aic[-3]
-        Bic <- Bic[-3]
-    }
     # Selezione in base al BIC
-    selection <- (1:length(Bic))[Bic-min(Bic)<IC.diff[1]]
-    # Se e' stato selezionato piu' di un modello:
-    if(length(selection)>1) {
-        # Selezione in base all'AIC
-        selection <- selection[Aic[selection]-min(Aic[selection])<IC.diff[2]]
+    Bic <- c(case.equal@BIC,case.diff@BIC,case.IC@BIC)
+    Bic.diff <- Bic-min(Bic)
+    selection <- Bic.diff<IC.diff[1]
+    if(Bic.diff[1] == Bic.diff[3]) {
+        # Il modello equal non è stato modificato dalla procedura IC
+        selection[3] <- FALSE
     }
-    
+    # Se e' stato selezionato piu' di un modello:
+    if(sum(selection)>1) {
+        # Selezione in base all'AIC
+        Aic <- c(case.equal@AIC,case.diff@AIC,case.IC@AIC)
+        Aic.diff <- Aic-min(Aic)
+        selection <- Aic.diff<IC.diff[1]
+        if(Aic.diff[1] == Aic.diff[3]) {
+            # Il modello equal non è stato modificato dalla procedura IC
+            selection[3] <- FALSE
+        }
+    }
+    selection <- seq_len(3)[selection]
     new("rav", observed=data, factors=fact, levels=lev,
         title=as.character(title), names=names, selection=selection,
+        start=start, lower=lower, upper=upper,
         equal=case.equal, differential=case.diff, IC=case.IC)
 }
 
@@ -330,19 +335,15 @@ rav.sim <- function(data, lev, fact, dim.data, sumlev, pos, start, upper, lower,
                 par[i,] <- model[[i]]@differential@param
         }
     }
-    # Colonna contenente il minimo numero di valori prossimi a zero:
-    w.base <- apply(par[,pos$wpos],2,median)
-    w.base <- which(w.base==max(w.base))[1]
     # Calcolo dei rapporti fra i pesi:
+    w.base <- apply(par[,pos$wpos],2,median)
+    w.base <- sumlev[2]+which(w.base==max(abs(w.base)))[1]
     par[,pos$wpos] <- par[,pos$wpos]/par[,w.base]
-    par.med <- rep.int(NA,2+sumlev[1])
-    par.med[pos$slast] <- colMeans(par[,pos$slast]) # media s
-    par.med[pos$wpos] <- apply(par[,pos$wpos],2,median) # mediana w
-    
+    start <- apply(par,2,median)
     # Stima del nuovo modello:
     model <- rav.base(
         data=data, lev=lev, fact=fact, dim.data=dim.data, sumlev=sumlev, pos=pos,
-        start=par.med, upper=upper, lower=lower, I0=I0, fixed=fixed, s.fixed=s.fixed,
+        start=start, upper=upper, lower=lower, I0=I0, fixed=fixed, s.fixed=s.fixed,
         nwfix=nwfix, delta.weights=delta.weights, all=all, verbose=FALSE,
         IC.diff=IC.diff, method=method, control=control, names=names, title=title
     )

@@ -86,7 +86,11 @@ parmeanlast <- function(param, fixed, sumlev, delta.weights, nwfix)
 fit.indexes <- function(output,data,lev,fact,sumlev,N,I0,dim.data,TSS,names,title)
 {
     Bic <- N*log(output$value/N)+output$n.pars*log(N)
-    Aic <- 2*output$n.pars*(N/(N-output$n.pars-1))+N*log(output$value/N)
+    Aic <- N*log(output$value/N)+2*output$n.pars
+    if(N/output$n.pars < 40) {
+        Bic <- Bic+(output$n.pars*log(N)*(output$n.pars+1))/(N-output$n.pars-1)
+        Aic <- Aic+(2*output$n.pars*(output$n.pars+1))/(N-output$n.pars-1)
+    }
     fitted <- averaging.int(output$par,lev,fact,sumlev)
     names(fitted) <- colnames(data)
     estim <- matrix(rep.int(fitted,dim.data[1]),nrow=dim.data[1],byrow=TRUE)
@@ -96,17 +100,18 @@ fit.indexes <- function(output,data,lev,fact,sumlev,N,I0,dim.data,TSS,names,titl
     expected <- estim
     observed[which(abs(observed)<1e-5)] <- 1e-5
     expected[which(abs(expected)<1e-5)] <- 1e-5
-    # Chi-quadrato: vedi Corbetta (1992), pag. 31,34,123
+    # Chi-quadrato: vedi Corbetta (1992), pagg. 31,34,123
+    # Attenzione: log su possibili valori negativi produce NaN, quindi aggiunto abs
     L2 <- 2*sum(observed*log(observed/expected),na.rm=TRUE)
-    df <- (2+2*sum(lev))-output$n.pars
+    df <- sumlev[3]-output$n.pars
     p.value <- 1-pchisq(L2,df)
     ChiSq <- list(L2=L2, df=df, p.value=p.value)
-    msg <- ""
+    
     if(output$value<TSS) RSS.control <- NULL
     else
         RSS.control <- "FATAL ERROR: the model does not fit the data"
-    if(output$convergence==0) msg <- ""
-    else {
+    msg <- ""
+    if(output$convergence!=0) {
         if(output$convergence==1)
             msg <- "Convergence error: the iteration limit maxit had been reached"
         if(output$convergence==10)
@@ -202,7 +207,7 @@ averaging <- function(param, lev, trials=1, sd=0, range=NULL)
     fact <- length(lev)
     sumlev <- as.integer(sum(lev))
     sumlev <- c(sumlev,2+sumlev,2+2*sumlev)
-    R <- averaging.int(param,lev,fact,lev)
+    R <- averaging.int(param,lev,fact,sumlev)
     R <- matrix(rep.int(R,trials), nrow=trials, byrow=TRUE)
     # ----------------------------------------------
     # Aggiunta di errore alle colonne

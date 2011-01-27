@@ -23,9 +23,9 @@
 
 \usage{
 rav(data, subset = NULL, lev, all= FALSE, sim = 0,
-    start = NULL, lower = NULL, upper = NULL,
+    range = NULL, start = NULL, lower = NULL, upper = NULL,
     I0 = FALSE, s.fixed = FALSE, w.fixed = FALSE,
-    IC.diff = c(2.5, 2.0), delta.weights = 0.1,
+    IC.diff = c(2, 2), delta.weights = 0.1,
     method = "L-BFGS-B", control = list(),
     title = NULL, names = NULL, verbose = FALSE)
 }
@@ -60,23 +60,30 @@ rav(data, subset = NULL, lev, all= FALSE, sim = 0,
         Number of iterations for the Monte-Carlo simulation procedure. The default setting
         \code{0} implies that no Monte-Carlo will be runned.
     }
+    \item{range}{
+        A vector containing the scale response range. If \code{NULL}, the minimum and maximum
+        values of the data matrix will be used. This values will be used as bounds for the
+        s-parameters when the minimization algorithm is L-BFGS-B.
+    }
     \item{start}{ 
         Vector containing the start scale and weight values, according to the following
         order: \code{s0, w0, s(k,j), w(k,j)}, for \code{k} and \code{j} set by the factorial
         design. With the default setting \code{NULL}, \code{rav} loads the default parameters:
-        \code{s0 = 0, w0 = 1, s(k,j) = max(R)/2, w = 1}.
+        \code{s0 = 0, w0 = 1, s(k,j) = max(range)/2, w = 1}.
     }
     \item{lower}{
         Vector containing the lower scale and weight values, according to the following
         order: \code{s0, w0, s(k,j), w(k,j)}, for \code{k} and \code{j} set by the factorial
-        design. With the default setting \code{NULL}, \code{rav} loads the default parameters:
-        \code{s0 = 0, w0 = 0.001, s(k,j) = min(R), w = 0.01} for each \code{k} and \code{j}.
+        design. With the default setting \code{NULL}, when the minimization algorithm is
+        L-BFGS-B, \code{rav} loads the default parameters:
+        \code{s0 = 0, w0 = 1e-5, s(k,j) = min(range), w = 1e-5} for each \code{k} and \code{j}.
     }
     \item{upper}{
         Vector containing the upper scale and weight values, according to the following
         order: \code{s0, w0, s(k,j), w(k,j)}, for \code{k} and \code{j} set by the factorial
-        design. With the default setting \code{NULL}, \code{rav} loads the default parameters:
-        \code{s0 = max(range), w0 = 10, s(k,j) = max(R), w = 10} for each \code{k} and \code{j}.
+        design. With the default setting \code{NULL}, when the minimization algorithm is L-BFGS-B,
+        \code{rav} loads the default parameters:
+        \code{s0 = max(range)/10, w0 = 10, s(k,j) = max(range), w = 10} for each \code{k} and \code{j}.
     }
     \item{I0}{
         Logical. If set \code{FALSE}, the \code{s0} and \code{w0} parameters are forced to be zero.
@@ -199,81 +206,82 @@ rav(data, subset = NULL, lev, all= FALSE, sim = 0,
     \code{\link[stats]{optim}}
 }
 
-\examples{
+\examples{\dontrun{
 # --------------------------------------
 # Example 1: 3x3 factorial design
 # --------------------------------------
 # The first column is filled with a sequence of NA values.
-# data(fmdata1)
-# fmdata1
-
+data(fmdata1)
+fmdata1
 # For a two factors design, the matrix data contains the one-way
 # sub-design and the two-ways full factorial design observed data.
 # Pay attention to the columns order:
 # sub-design: A1, A2, A3, B1, B2, B3
 # full factorial: A1B1, A1B2, A1B3, A2B1, A2B2, A2B3, A3B1, A3B2, A3B3
 # Start the R-Average procedure:
-# fm1 <- rav(fmdata1, lev=c(3,3))
-# fm1 # print the best model selected
-# summary(fm1) # print the fitted models
+fm1 <- rav(fmdata1, lev=c(3,3), range=c(0,20))
+# (notice that 'range' argument specifies the range of the response scale)
+fm1 # print the best model selected
+summary(fm1) # print the fitted models
 
 # To insert the factor names:
-# fact.names <- c("Name of factor A", "Name of factor B")
-# fm1 <- rav(fmdata1, lev=c(3,3), names = fact.names)
+fact.names <- c("Name of factor A", "Name of factor B")
+fm1 <- rav(fmdata1, lev=c(3,3), range=c(0,20), names=fact.names)
 
 # To insert a output title:
-# out.title <- c("Put your title here")
-# fm1 <- rav(fmdata1, lev=c(3,3), title=out.title)
+out.title <- c("Put your title here")
+fm1 <- rav(fmdata1, lev=c(3,3), title=out.title)
+# (notice that the range argument is not required, but it is recommended)
 
 # To supervise the information criterion work flow:
-# fm1 <- rav(fmdata1, lev=c(3,3), verbose=TRUE)
+fm1 <- rav(fmdata1, lev=c(3,3), range=c(0,20), verbose=TRUE)
 
 # To increase the number of iterations of the minimization routine:
-# fm1 <- rav(fmdata1, lev=c(3,3), control=list(maxit=5000))
+fm1 <- rav(fmdata1, lev=c(3,3), range=c(0,20), control=list(maxit=5000))
 
 # To set a fixed value for weights:
-# wfix <- list(A=c(NA,0.4,0.4), B=c(NA,NA,NA))
-# wfix
+wfix <- list(A=c(NA,0.4,0.4), B=c(NA,NA,NA))
+wfix
 # Warning: NA specify no-fixed weights
-# fm1.fix <- rav(fmdata1, lev=c(3,3), w.fixed=wfix)
+fm1.fix <- rav(fmdata1, lev=c(3,3), range=c(0,20), w.fixed=wfix)
 # Otherwise, it's possible to call a GUI:
-# fm1.fix <- rav(fmdata1, lev=c(3,3), w.fixed=TRUE)
+fm1.fix <- rav(fmdata1, lev=c(3,3), range=c(0,20), w.fixed=TRUE)
 
 # rav can work without sub-designs. If any sub-design is not available,
 # the corresponding column must be coded with NA values. For example:
-# fmdata1[,1:3] <- NA
-# fmdata1
-# fmdata1 # the A sub-design is empty
-# fm1.bis <- rav(fmdata1, lev=c(3,3), title="Sub-design A is empty")
+fmdata1[,1:3] <- NA
+fmdata1
+fmdata1 # the A sub-design is empty
+fm1.bis <- rav(fmdata1, lev=c(3,3), range=c(0,20), title="Sub-design A is empty")
 
 # Using a subset of data:
-# data(pasta)
-# pasta
+data(pasta)
+pasta
 # Analyzing "subj.04" only:
-# fact.names <- c("Price","Packaging")
-# fm.subj04 <- rav(pasta, subset="subj.04", lev=c(3,3), names=fact.names)
+fact.names <- c("Price","Packaging")
+fm.subj04 <- rav(pasta, subset="subj.04", lev=c(3,3), range=c(0,20), names=fact.names)
 
 # --------------------------------------
 # Example 2: 3x5 factorial design
 # --------------------------------------
-# data(fmdata2)
+data(fmdata2)
 # (Pay attention to the columns order)
-# fmdata2
-# fm2 <- rav(fmdata2, lev=c(3,5))
+fmdata2
+fm2 <- rav(fmdata2, lev=c(3,5), range=c(0,20))
 # Removing all the one-way sub-design:
-# fmdata2[,1:8] <- NA
-# fm2.bis <- rav(fmdata2, lev=c(3,5))
+fmdata2[,1:8] <- NA
+fm2.bis <- rav(fmdata2, lev=c(3,5), range=c(0,20))
 
 # --------------------------------------
 # Example 3: 3x2x3 factorial design
 # --------------------------------------
-# data(fmdata3)
+data(fmdata3)
 # (Pay attention to the columns order)
-# fm3 <- rav(fmdata3, lev=c(3,2,3))
+fm3 <- rav(fmdata3, lev=c(3,2,3), range=c(0,20))
 # Removing all the one-way design and the AxC sub-design:
-# fmdata3[,1:8] <- NA # one-way designs
-# fmdata3[,15:23] <- NA # AxC design
-# fm3 <- rav(fmdata3, lev=c(3,2,3))
-}
+fmdata3[,1:8] <- NA # one-way designs
+fmdata3[,15:23] <- NA # AxC design
+fm3 <- rav(fmdata3, lev=c(3,2,3), range=c(0,20))
+}}
 
 \keyword{misc}
