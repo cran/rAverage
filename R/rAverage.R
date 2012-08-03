@@ -41,6 +41,6 @@
     ver <- as.character(ver)
     title <- read.dcf(file.path(lib, pkg, "DESCRIPTION"), "Title")
     title <- as.character(title)
-    cat(paste(title, " (version ", ver, ")\n", sep = ""))
+    packageStartupMessage(paste(title, " (version ", ver, ")\n", sep = ""))
     library.dynam("rAverage", pkg, lib)
 }
