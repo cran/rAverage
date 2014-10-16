@@ -19,7 +19,7 @@ void numpar(double *param, int *len, int *out)
                 if(k==jump[j]) k++;
             diff = param[i]-param[k];
             if(diff<0) diff *= (-1);
-            if(diff<1e-8) {
+            if(diff==0) { //diff<1e-8
                 count++;
                 jump[count] = k;
                 (*out) = (*out)-1;
@@ -117,9 +117,10 @@ void residual(double *param, double *fixed, int *lev, int *fact, int *sumlev, do
     double estimated[dimdata[1]];           // Conterra' gli R ricostruiti
     
     //Inizializzazione del vettore parameters
-    for(i=0; i<sumlev[2]; i++) 
+    for(i=0; i<sumlev[2]; i++)  {
         if(!isnan(fixed[i])) parameters[i] = fixed[i]; // Parametri fissi
         else parameters[i] = param[i]; //parametri liberi
+    }
     
     // Calcolo RSS
     averaging(parameters, lev, fact, sumlev, estimated);
@@ -163,4 +164,56 @@ void residual_eq(double *param, double *fixed, int *lev, int *fact, int *sumlev,
         if(i==((dimdata[0])*(j+1)-1)) j++;
     }
 }
- 
+
+void residual_null(double *param, double *fixed, int *lev, int *fact, int *sumlev, int *spos_first, int *in_st, double *observed, int *dimdata, int *model, double *RSS)
+{
+    int i,j;                                // Indici da usare nei cicli
+    int lentot=(dimdata[0])*(dimdata[1]);   // Lunghezza di observed 
+    double resid;                           // Conterra' il residuo per ogni R
+    double estimated[dimdata[1]];           // Conterra' gli R ricostruiti
+    double parameters[sumlev[2]];
+    
+    // Permettere di poter fissare gli s
+    
+    // Stato iniziale
+    if(*in_st==0 || *model==0) {
+        parameters[0] = fixed[0];
+        parameters[1] = fixed[1];
+    } else {
+        parameters[0] = param[0];
+        parameters[1] = 0;
+    }
+    // Valori di scala
+    if(*model==1) { // Un s per tutto
+        for(i=2; i<sumlev[1]; i++)
+            parameters[i] = param[*in_st];
+    }
+    if(*model==2) { // Un s per fattore
+        for(i=0; i<*fact; i++) {
+            for(j=0; j<lev[i]; j++)
+                parameters[spos_first[i]+j] = param[i+*in_st];
+        }
+    }
+    if(*model==3) { // Un s per ogni livello di ogni fattore
+        for(i=2; i<sumlev[1]; i++) {
+            if(!isnan(fixed[i])) parameters[i] = fixed[i]; // fissaggio degli s
+            else parameters[i] = param[i-2+*in_st];
+        }
+    }
+    
+    // Pesi
+    for(i=sumlev[1]; i<sumlev[2]; i++)
+        parameters[i] = 0;
+    
+    
+    // Calcolo RSS
+    averaging(parameters, lev, fact, sumlev, estimated);
+    j = 0;
+    for(i=0; i<lentot; i++) {
+        if(!isnan(observed[i])) {
+            resid = estimated[j]-observed[i];
+            *RSS += resid*resid;
+        }
+        if(i==((dimdata[0])*(j+1)-1)) j++;
+    }
+}

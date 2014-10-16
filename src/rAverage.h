@@ -37,6 +37,9 @@ void residual(double *param, double *fixed, int *lev, int *fact, int *sumlev, do
 void residual_eq(double *param, double *fixed, int *lev, int *fact, int *sumlev, double *observed, int *dimdata, double *RSS);
 /* Calcola la sommatoria dei quadrati residua per l'EAM */
 
+void residual_null(double *param, double *fixed, int *lev, int *fact, int *sumlev, int *spos_first, int *in_st, double *observed, int *dimdata, int *model, double *RSS);
+/* Calcola la sommatoria dei quadrati residua per i modelli nulli */
+
 void numpar(double *param, int *len, int *out);
 /* Calcola il numero di parametri */
 

@@ -1,16 +1,16 @@
-Residual <- function(param,fixed,data,lev,fact,sumlev,dim.data,delta.weights,nwfix)
+Residual.null <- function(param,fixed=0,model,I0,data,lev,fact,sumlev,sposFirst,dim.data)
 {
-    .C("residual",
+    .C("residual_null",
         param = as.double(param),
         fixed = as.double(fixed),
         lev = as.integer(lev),
         fact = as.integer(fact),
         sumlev = as.integer(sumlev),
+        spos_first = as.integer(sposFirst),
+        in_st = as.integer(I0),
         observed = as.double(data),
         dimdata = as.integer(dim.data),
-        deltaweights = as.double(delta.weights),
-        numfix = as.integer(nwfix$num),
-        valfix = as.double(nwfix$nwval),		
+        model = as.integer(model),
         RSS = as.double(0),
         NAOK = TRUE,
         PACKAGE = "rAverage"
@@ -19,6 +19,7 @@ Residual <- function(param,fixed,data,lev,fact,sumlev,dim.data,delta.weights,nwf
 
 Residual.eq <- function(param,fixed,data,lev,fact,sumlev,dim.data)
 {
+    # Riceve i pesi in t (la averaging li trasformera' in w)
     .C("residual_eq",
         param = as.double(param),
         fixed = as.double(fixed),
@@ -32,14 +33,35 @@ Residual.eq <- function(param,fixed,data,lev,fact,sumlev,dim.data)
         PACKAGE = "rAverage"
     )$RSS
 }
+
+Residual <- function(param,fixed,data,lev,fact,sumlev,dim.data,Dt,nwfix)
+{
+    # Riceve i pesi in t (la averaging li trasformera' in w)
+    .C("residual",
+        param = as.double(param),
+        fixed = as.double(fixed),
+        lev = as.integer(lev),
+        fact = as.integer(fact),
+        sumlev = as.integer(sumlev),
+        observed = as.double(data),
+        dimdata = as.integer(dim.data),
+        deltaweights = as.double(Dt),
+        numfix = as.integer(nwfix$num),
+        valfix = as.double(nwfix$nwval),		
+        RSS = as.double(0),
+        NAOK = TRUE,
+        PACKAGE = "rAverage"
+    )$RSS
+}
+
 ## ###################################################################################
 
 optimization.IC <- function(
     data, fact, lev, sumlev, pos, N, dim.data,  # dati del disegno sperimentale
     model.start, par.base, nwfix, fixed,        # modello di partenza, parametri e fissi
-    delta.weights, IC.diff, all, verbose,       # opzioni per la procedura di stima
-    lower, upper, method, control)              # opzioni per optim
-{   
+    I0, Dt, IC.diff, all, verbose, IC.break,    # opzioni per la procedura di stima
+    lower, upper, method, control, change)      # opzioni per optim (change indica se lo start e' stato modificato)
+{
     # Contiene i parametri del modello di partenza per la routine di minimizzazione:
     START <- list(
          param = model.start@param,
@@ -75,6 +97,7 @@ optimization.IC <- function(
     }
 
     for(i in 1:sumlev[1]) {
+        # if(i > 1 & IC.break == TRUE & change == FALSE) break;
         if(verbose) cat("#",i,"free weights\n")
         START$param[pos$fixed] <- fixed[pos$fixed]
         BEST$IC <- START$IC
@@ -86,7 +109,7 @@ optimization.IC <- function(
         # Fissaggio dei pesi
         # --------------------------------------
         # Se alcuni pesi sono stati fissati non possono essere modificati dalla
-        # routine. Si devono eliminare da cc le righe con i loro indici.
+        # routine. Si devono quindi eliminare da cc le righe con i loro indici.
         if(nwfix$num) {
             # Matrice che conterra' le combinazioni di pesi che saranno selezionate
             # (ovvero le combinazioni che non contengono pesi fissi):
@@ -137,27 +160,36 @@ optimization.IC <- function(
             eachfixed[pos$wpos[-cc[j,]]] <- START$param[pos$wpos[-cc[j,]]]
             
             # Stima dei parametri:
-            output <- optim(par=START$param, fn=Residual,
-                fixed=eachfixed, data=data, lev=lev, fact=fact, sumlev=sumlev, dim.data=dim.data,
-                delta.weights=delta.weights, nwfix=nwfix[c(1,3)], method=method, lower=lower,
-                upper=upper, control=control
+            output <- optim(par=START$param, fn=Residual, fixed=eachfixed, data=data,
+                lev=lev, fact=fact, sumlev=sumlev, dim.data=dim.data, Dt=Dt,
+                nwfix=nwfix[c(1,3)], method=method, lower=lower, upper=upper, control=control
             )
+            
+            # Si scalano i t
+            # Attenzione: scalare i t in questo punto potrebbe risultare critico. Se alcuni t vengono
+            # compressi contro il limite superiore e altri contro il limite inferiore, potrebbe
+            # accadere che la correzione t = t-mean(t) faccia oltrepassare i bound ai t. Se usati
+            # come start nel ciclo successivo, questi t andranno a genererare un errore nella optim.
+            if(!I0)
+                output$par[pos$wpos] <- output$par[pos$wpos]-mean(output$par[pos$wpos])
+            else
+                output$par[pos$w0wpos] <- output$par[pos$w0wpos]-mean(output$par[pos$w0wpos])
             
             # Sostituzione dei parametri fissi a quelli in output:
             output$par[pos$fixed] <- fixed[pos$fixed]
             
-            # Se qualche peso vale zero va sostituito:
-            if(any(output$par[pos$wpos]==0))
-                output$par[pos$wpos][which(output$par[pos$wpos]==0)] <- 1e-10
-            
             # I pesi uguali entro un certo delta vengono eguagliati:
-            output$par <- parmeanlast(output$par,fixed,sumlev,delta.weights,nwfix)
+            output$par <- parmeanlast(output$par,fixed,sumlev,Dt,nwfix)
             
             # Calcolo del numero di parametri:
-            output$n.pars <- par.base+numpar(output$par[pos$wpos],sumlev[1])
+            if(nwfix$num==0)
+                output$n.pars <- par.base+numpar(output$par[pos$wpos],sumlev[1])-1
+            else
+                output$n.pars <- par.base+numpar(output$par[pos$wpos[-nwfix$pos]],sumlev[1]-nwfix$num)-1
             
             # Dato che i parametri potrebbero essere stati modificati si ricalcola l'RSS:
-            output$value <- Residual(output$par,fixed,data,lev,fact,sumlev,dim.data,delta.weights,nwfix)
+            output$value <- Residual(output$par,fixed,data,lev,fact,sumlev,dim.data,Dt,nwfix)
+            
             # Calcolo degli indici AIC e BIC
             output$IC <- c(
                 N*log(output$value/N)+output$n.pars*logN, # BIC
@@ -179,7 +211,7 @@ optimization.IC <- function(
                 BEST$comb   <- cc[j,]
                 BEST$conv   <- output$convergence
                 BEST$msg    <- output$message
-                accepted    <- TRUE
+                accepted    <- change <- TRUE
                 decision <- "Accepted"
             }
             
@@ -204,20 +236,20 @@ optimization.IC <- function(
             selected[BEST$comb] <- TRUE
         }
     }
-    if(verbose) 
+    if(verbose)
         cat("-> select","\t",
-            "RSS:",round(START$RSS,2),  "\t",
+            "RSS:",round(START$RSS,2),"\t",
             "BIC:",round(START$IC[1],2),"\t",
             "AIC:",round(START$IC[2],2),"\n\n"
         )
-    
     return(
         list(
             par = START$param,
             value = START$RSS,
             convergence = START$conv,
             message = START$msg,
-            n.pars = START$n.pars
+            n.pars = START$n.pars,
+            change = change
         )
     )
 }

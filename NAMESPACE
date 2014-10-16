@@ -1,13 +1,19 @@
-# require(mvUtils)
-# importFrom(mvUtils,elements)
-
+import(methods)
+import(tcltk)
 export(
-     rav,          # Stima dei parametri del modello Averaging
-     rav.cmd,      # Interfaccia grafica per rav
-     averaging,    # Da parametri separati a osservazione per modello averaging
-     pargen,       # Genera dei parametri casuali per il modello averaging
-     rav.indexes,  # Calcola gli indici di fit
-     parameters    # Estrae i parametri del miglior modelo stimato
+     rav,            # Parameter estimation for averaging models
+     rav.single,     # Single subject analysis
+     datgen,         # Generate observed response for the averaging model
+     pargen,         # Generate pseudorandom parameters for the averaging model
+     rav.grid,       # Generate an empty matrix in 'rav' format
+     rav.indices,    # Calculate the fit indexes
+     rav.AIC,        # Extract the Akaike Information Criterion
+     rav.BIC,        # Extract the Bayesian Information Criterion
+     rav.fitted,     # Extract the predicted values of the best model
+     rav.resid,      # Extract the residuals
+     rav.param,      # Extract the parameters
+     rav2file,       # Export rav results
+     outlier.replace # Detect and replace outliers
     )
 exportClasses(rav)
-exportMethods(summary,show,fitted,residuals)
+exportMethods(summary,show)

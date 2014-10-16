@@ -64,9 +64,10 @@ void averaging(double *param, int *lev, int *fact, int *sumlev, double *R)
   ------------------------------------------------
 */
     // Parametri del modello averaging:
+    w0 = exp(w0);
     for(j=0; j<sumlev[0]; j++) {
         s[j] = param[2+j];
-        w[j] = param[sumlev[1]+j];
+        w[j] = exp(param[sumlev[1]+j]);
     }
     // steps contiene i "salti" da effettuare all'interno dei vettori
     // s e w per passare dai parametri di un fattore all'altro:

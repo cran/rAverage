@@ -1,3 +1,59 @@
+# 0.4-10:   Aggiunta verifica per valore TSS: se zero, non c'e' variabilita' nei dati e nessun
+#           calcolo puo' essere svolto.
+# 0.4-9:    Aggiornato il calcolo per la standardizzazione dei residui in rav.resid. Funzione
+#           'empty.grid' rinominata in 'rav.grid'.
+# 0.4-8:    Aggiornata la definzione delle classi al nuovo standard della versione 3 di R. Aggiunte
+#           le funzioni rav.single e rav2file.
+# 0.4-7:    Corretto bug nella definizione di s.range per metodo L-BFGS-B. Corretto bug nella
+#           definizione di N. Implementate le funzioni rav.AIC e rav.BIC. Aggiunto il soggetto 29
+#           al dataset 'pasta'. Aggiornato codice per la stampa del messaggio di caricamento.
+# 0.4-6:    Corretto bug nel cntrollo if di s.range. Adattata la dimensione della maschera per il
+#           fissaggio dei parametri.
+# 0.4-5:    Aggiunta una patch per correggere un bug di optim: se optim non converge e da' il
+#           messaggio di errore 'ERROR: NO FEASIBLE SOLUTION', allora il valore RSS in output non
+#           corrispondera' al vero RSS prodotto dai parametri.
+# 0.4-4:    Riordinati gli argomenti di rav. Corretto conflitto tra variabili nella funzione pargen.
+# 0.4-3:    Routine di minimizzazione di default modificata in BFGS. Funzioni fit.indexes e
+#           rav.indexes rinominate in fit.indices e rav.indices. Funzione rav.sqresid accorpata alla
+#           funzione rav.resid. Argomenti type.par e t.out sostituiti con t.par. Eliminato
+#           arrotondamento decimale dei valori su datgen e rav.resid. Eliminata procedura di
+#           uguagliamento dei pesi in DAM. Correzione sulla funzione che calcola il numero di pesi:
+#           un peso non viene considerato nel computo. Eliminata funzione rav.cmd. Rimosso indice
+#           chi-quadrato. Riportato in output il metodo di minimizzazione utilizzato.
+# 0.4-2     Corretti i nomi e le sigle dei modelli e alcuni bug interni alla funzione rav.
+#           Nelle funzioni rav.param, rav.resid e rav.fitted, l'argmento 'which' è stato rinominato
+#           in 'whichModel'. Inoltre, l'argomento ora richide una stringa di carattere che specifica
+#           la sigla del modello.
+#           La funzione pargen ora manda in output valori NA per s0 e w0 se I0=F. Inoltre, attraverso
+#           l'argomento type.par, si può specificare quale tipo di parametro si vuole generare, se
+#           'w' oppure 't'. I pesi in output sono normalizzati.
+#           La funzione datgen ora richiede che venga specificato, tramite l'argomento type.par,
+#           se il vettore di parametri in input contiene i pesi in formato 'w' oppure 't'. Inoltre,
+#           non è necessario che le venga specificato se lo stato iniziale deve essere presente o
+#           assente, perche' lo capisce da sola analizzando il valore di w0: se questo e' NA, allora
+#           non considera lo stato iniziale. N.B.: dato che comunque nella generazione degli R sono
+#           richiesti dei valori per s0 e w0, questi verranno posti rispettivamente a 0 e a 1e-10.
+#           Nella funzione rav, I0 è ora posto a F per default. Inoltre, se I0=F, allora i valori di
+#           s0 e w0 saranno restituiti pari a NA.
+#           La funzione outlier.remove è stata rinominata in outlier.replace, perché effettivamente
+#           non elimina gli outlier ma li sostituisce con un valore. Ora l'utente può passare come
+#           valore da sostituire agli NA anche una funzione che, applicata per colonna, calcolera'
+#           da se' un valore da sistituire, diverso per ogni colonna della matrice. N.B.: l'argomento
+#           'value' prima era denominato 'replace'.
+#           Aggiustata la funzione rav.indexes. Come per datgen, non ha piu' bisogno che le venga
+#           specificato se lo stato iniziale e' presente o assente, perche' e' in grado di capiro da
+#           sola dal valore di w0 (se w0=NA, allora I0=F). Inoltre, grazie all'argomento type.par,
+#           e' in grado di capire se i parametri che le vengono passati sono 'w' oppure 't', agendo
+#           di conseguenza. Se w0=NA, il valore verra' di nascosto posto pari a 1e-10. Corretto un
+#           bug che impediva che il titolo del modello fosse riportato in output.
+#           Aggiunta la funzione rav.sqresid, che calcola le medie dei residui al quadrato.
+# 0.4-1     Corretti bug della versione 0.4-0. Riunite le funzioni rav e rav.base. Eliminata la
+#           funzione rav.sim: dato che i valori di start vengono identificati sequenzialmente, non
+#           ha piu' senso stabilirli tramite simulazione Monte-Carlo. In rav, quando I0=F, i valori
+#           s0 e w0 non vengono mostrati in output. Per rav, aggiunto l'argomento t.out, che se TRUE
+#           mostra in output i t invece dei w.
+# 0.4-0     Implementato l'argoritmo in versione 'esponenziale': l'ottimizzazione non avvienee piu'
+#           sui parametri w ma sui t. Implementati modelli null, ESM, SAM.
 # 0.3-0     Versione ottimizzata della 0.2, modificata parmean, aggiunto argomento sim
 # 0.2-2     Corretto bug sul calcolo di TSS
 # 0.2-1     Funzioni averaging, residuals, combin e calcolo dei parameteri implementate in C.
@@ -33,14 +89,16 @@
 # 0.0-01    Funziona con modelli 3x3 e 3x3x3x3 (2006/02/01)
 
 .packageName <- "rAverage"
-
-.onLoad <- function(lib, pkg)
+.onAttach <- function(lib, pkg)
 {
     where <- match(paste("package:", pkg, sep = ""), search())
     ver <- read.dcf(file.path(lib, pkg, "DESCRIPTION"), "Version")
     ver <- as.character(ver)
     title <- read.dcf(file.path(lib, pkg, "DESCRIPTION"), "Title")
     title <- as.character(title)
-    packageStartupMessage(paste(title, " (version ", ver, ")\n", sep = ""))
-    library.dynam("rAverage", pkg, lib)
+    packageStartupMessage(paste(title, " (version ", ver, ")", sep = ""))
+    #library.dynam("rAverage", pkg, lib)
 }
+
+.onLoad <- function(lib, pkg)
+    library.dynam("rAverage", pkg, lib)

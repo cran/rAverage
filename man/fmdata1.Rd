@@ -33,12 +33,12 @@ data(fmdata3)
 }
 \format{A \code{matrix} object.}
 
-\examples{
-# data(fmdata1)
-# fm1 <- rav(fmdata1, lev=c(3,3))
-# data(fmdata2)
-# fm2 <- rav(fmdata2, lev=c(3,5))
-# data(fmdata3)
-# fm3 <- rav(fmdata3, lev=c(3,2,3))
-}
+\examples{\dontrun{
+data(fmdata1)
+fm1 <- rav(fmdata1, lev=c(3,3))
+data(fmdata2)
+fm2 <- rav(fmdata2, lev=c(3,5))
+data(fmdata3)
+fm3 <- rav(fmdata3, lev=c(3,2,3))
+}}
 \keyword{datasets}
