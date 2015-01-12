@@ -7,7 +7,7 @@ int binomial(int n, int k);
 */
 
 int combin_length(int n);
-/* Calcola la lunghezza del vettore out da passare a combin */
+/* Calcola la lunghezza massima del vettore out da passare a combin */
 
 void combin(int *n, int *k, int *out);
 /*

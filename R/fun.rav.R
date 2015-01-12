@@ -2,18 +2,25 @@
 # Internal functions
 # --------------------------------------
 
+# Calcola il numero di risposte osservate per un dato disegno fattoriale:
+respdim <- function(lev)
+{
+    Rlen <-
+        .C("respdim",
+            lev = as.integer(lev),
+            fact = as.integer(length(lev)),
+            dim = as.integer(0),
+            PACKAGE = "rAverage"
+        )$dim
+    return(Rlen)
+}
+
 # Ricompone gli R a partire dai parametri in input. E' una
 # funzione interna che non puo' essere richiamata dall'utente.
 averaging <- function(param,lev,fact,sumlev)
 {
     # La funzione riceve i t, che saranno trasformati in w nella averaging
-    Rlen <-
-        .C("respdim",
-            lev = as.integer(lev),
-            fact = as.integer(fact),
-            dim = as.integer(0),
-            PACKAGE = "rAverage"
-        )$dim
+    Rlen <- respdim(lev)
     R <-
         .C("averaging",
             param = as.double(param),
@@ -127,13 +134,7 @@ parmeanlast <- function(param, fixed, sumlev, Dt, nwfix)
 # da analizzare con rav.
 rav.grid <- function(lev,trials=1,subset=FALSE,names=NULL)
 {
-    all.resp <-
-        .C("respdim",
-            lev = as.integer(lev),
-            fact = as.integer(length(lev)),
-            dim = as.integer(0),
-            PACKAGE = "rAverage"
-        )$dim
+    all.resp <- respdim(lev)
     mat <- data.frame(matrix(NA,nrow=trials,ncol=all.resp+subset))
     col.names <- data.names(lev,names)
     if(subset) col.names <- c("subset",col.names)
@@ -208,13 +209,7 @@ rav.indices <- function(param,lev,data,t.par=FALSE,subset=NULL,n.pars=NULL,names
     data <- as.matrix(data)
     dim.data <- dim(data) 
     if(dim.data[2]==1) data <- t(data)
-    all.resp <-
-        .C("respdim",
-            lev = as.integer(lev),
-            fact = as.integer(fact),
-            dim = as.integer(0),
-            PACKAGE = "rAverage"
-        )$dim
+    all.resp <- respdim(lev)
     # Se c'e' la colonna di raggruppamento la si elimina:
     if(dim.data[2]!=all.resp) {
         if(dim.data[2] == (all.resp+1)) {
@@ -338,13 +333,7 @@ rav.single <- function(data,...)
         stop("Data must be matrix or data.frame")
     # Numero corretto di colonne della matrice:
     lev <- list(...)$lev
-    all.resp <-
-        .C("respdim",
-            lev = as.integer(lev),
-            fact = as.integer(length(lev)),
-            dim = as.integer(0),
-            PACKAGE = "rAverage"
-        )$dim
+    all.resp <- respdim(lev)
     # Numero reale di colonne della matrice:
     numCol <- ncol(data)
     # Se manca, aggiungo la colonna per i soggetti:
@@ -444,7 +433,7 @@ outlier.replace <- function(object, whichModel=NULL, alpha=0.05, value=NA)
     resid <- standardized(resid)
     # Calcolo z critico
     N <- sum(!is.na(object@observed))
-    cutoff <- qnorm(1-alpha/N)
+    cutoff <- qnorm(1-alpha/2)
     # Rimozione outliers
     outliers <- abs(resid) > cutoff
     if(!is.function(value))
@@ -462,22 +451,12 @@ rav2file <- function(object,what,whichModel=NULL,file=file.choose(),sep=",",dec=
 {
     if(!is.list(object)) {
         # nel caso object non sia risultato di rav.single
-        all.resp <- .C("respdim",
-            lev = as.integer(object@levels),
-            fact = as.integer(object@factors),
-            dim = as.integer(0),
-            PACKAGE = "rAverage"
-        )$dim
+        all.resp <- respdim(object@levels)
         S <- "1" # codice soggetto
         object <- list(subj=object)
     } else {
         S <- names(object)
-        all.resp <- .C("respdim",
-            lev = as.integer(object[[1]]@levels),
-            fact = as.integer(object[[1]]@factors),
-            dim = as.integer(0),
-            PACKAGE = "rAverage"
-        )$dim
+        all.resp <- respdim(object[[1]]@levels)
     }
     N <- length(object)
     subject <- NULL

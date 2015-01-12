@@ -22,16 +22,16 @@ int binomial(int n, int k)
 
 int combin_length(int n)
 {
-    int len;
-    if(n == 3)
-        len = 6;
-    else {
-        if((n%2) == 0)
-            len = (n/2)*binomial(n,n/2);
-        else
-            len = ((n-1)/2)*binomial(n,(n-1)/2);
-    }
-    return(len);
+    int choose;
+    double length = n;
+    double middle_int;
+    double middle_dec;
+    middle_dec = modf(length/2,&middle_int);
+    if(middle_dec >= 0.5)
+        middle_int++;
+    choose = binomial(length,middle_int);
+    n = middle_int * choose;
+    return(n);
 }
 
 void combin(int *n, int *k, int *out)

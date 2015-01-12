@@ -1,3 +1,8 @@
+# 0.4-13:   Corretto bug in combin_length e ripristinata funzione respdim in C; corretto bug
+#           in funzione outllier.replace.
+# 0.4-12:   Funzione R respdim inserita anche all'interno di rav().
+# 0.4-11:   Funzione respdim riscritta in R per problema di gestione della memoria; bisogna
+#           verificare ed eventualmente correggere e ripristinare la vecchia funzione C.
 # 0.4-10:   Aggiunta verifica per valore TSS: se zero, non c'e' variabilita' nei dati e nessun
 #           calcolo puo' essere svolto.
 # 0.4-9:    Aggiornato il calcolo per la standardizzazione dei residui in rav.resid. Funzione

@@ -20,8 +20,8 @@
     \tabular{ll}{
         Package: \tab rAverage\cr
         Type: \tab Package\cr
-        Version: \tab 0.4-10\cr
-        Date: \tab 2014-10-16\cr
+        Version: \tab 0.4-12\cr
+        Date: \tab 2015-01-12\cr
         License: \tab GNU (version 2 or later)\cr
     }
     
@@ -55,7 +55,7 @@
     
     \bold{version 0.1 and following}:\cr
     Stefano Noventa \email{stefano.noventa@univr.it}\cr
-    Davide Massidda \email{davide.massidda@unipd.it}\cr
+    Davide Massidda \email{davide.massidda@gmail.com}\cr
 }
 
 \references{

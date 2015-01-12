@@ -48,8 +48,10 @@ outlier.replace(object, whichModel = NULL, alpha = 0.05, value = NA)
 }
 
 \examples{
-# outlier.replace(model, value=mean)
-# outlier.replace(model, whichModel="IC", value=NA)
+data(pasta)
+model <- rav(pasta, subset="s04", lev=c(3,3), names=c("Price","Packaging"))
+outlier.replace(model, value=mean)
+outlier.replace(model, whichModel="IC", value=NA)
 }
 
 \keyword{misc}

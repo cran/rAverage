@@ -192,7 +192,7 @@ rav( data, subset = NULL, mean = FALSE, lev, s.range = c(NA,NA),
     
     \bold{version 0.1 and following}:\cr
     Stefano Noventa \email{stefano.noventa@univr.it}\cr
-    Davide Massidda \email{davide.massidda@unipd.it}\cr
+    Davide Massidda \email{davide.massidda@gmail.com}\cr
 }
 
 \references{
@@ -293,9 +293,9 @@ fm1.bis <- rav(fmdata1, lev=c(3,3), title="Sub-design A is empty")
 # Using a subset of data:
 data(pasta)
 pasta
-# Analyzing "subj.04" only:
+# Analyzing "s04" only:
 fact.names <- c("Price","Packaging")
-fm.subj04 <- rav(pasta, subset="subj.04", lev=c(3,3), names=fact.names)
+fm.subj04 <- rav(pasta, subset="s04", lev=c(3,3), names=fact.names)
 
 # --------------------------------------
 # Example 2: 3x5 factorial design

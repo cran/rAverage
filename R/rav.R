@@ -30,13 +30,7 @@ rav <- function(data, subset=NULL, mean=FALSE, lev, s.range=c(NA,NA), w.range=ex
         dim.data <- dim(data)
     }
     # Numero corretto di colonne della matrice di dati:
-    all.resp <-
-        .C("respdim",
-            lev = as.integer(lev),
-            fact = as.integer(fact),
-            dim = as.integer(0),
-            PACKAGE = "rAverage"
-        )$dim
+    all.resp <- respdim(lev)
     # Se c'e', si elimina la colonna di codifica, e i codici diventano i nomi di riga:
     if(dim.data[2]!=all.resp) {
         if(dim.data[2] == (all.resp+1)) {
