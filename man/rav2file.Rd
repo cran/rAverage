@@ -8,7 +8,8 @@
 }
 
 \usage{
-rav2file(object, what, whichModel = NULL, file = file.choose(), sep = ",", dec = ".")
+rav2file(object, what = c("resid","param"), whichModel = NULL,
+         file = file.choose(), sep = ",", dec = ".")
 }
 
 \arguments{

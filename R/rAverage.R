@@ -1,3 +1,8 @@
+# 0.5-3:    Aggiunta la registrazione delle routine C secondo nuovi standard.
+# 0-5-2:    Ottimizzati alcuni passaggi funzione C combin.
+# 0.5-1:    Corretta descrizione del pacchetto nel file description.
+# 0.5-0:    Utilizzati i metodi AIC, BIC, coef, fitted e residuals al posto delle funzione rav.AIC,
+#           rav.BIC, rav.param, rav.fitted, rav.resid.
 # 0.4-13:   Corretto bug in combin_length e ripristinata funzione respdim in C; corretto bug
 #           in funzione outllier.replace.
 # 0.4-12:   Funzione R respdim inserita anche all'interno di rav().
@@ -26,22 +31,22 @@
 #           un peso non viene considerato nel computo. Eliminata funzione rav.cmd. Rimosso indice
 #           chi-quadrato. Riportato in output il metodo di minimizzazione utilizzato.
 # 0.4-2     Corretti i nomi e le sigle dei modelli e alcuni bug interni alla funzione rav.
-#           Nelle funzioni rav.param, rav.resid e rav.fitted, l'argmento 'which' è stato rinominato
+#           Nelle funzioni rav.param, rav.resid e rav.fitted, l'argmento 'which' ? stato rinominato
 #           in 'whichModel'. Inoltre, l'argomento ora richide una stringa di carattere che specifica
 #           la sigla del modello.
 #           La funzione pargen ora manda in output valori NA per s0 e w0 se I0=F. Inoltre, attraverso
-#           l'argomento type.par, si può specificare quale tipo di parametro si vuole generare, se
+#           l'argomento type.par, si pu? specificare quale tipo di parametro si vuole generare, se
 #           'w' oppure 't'. I pesi in output sono normalizzati.
 #           La funzione datgen ora richiede che venga specificato, tramite l'argomento type.par,
 #           se il vettore di parametri in input contiene i pesi in formato 'w' oppure 't'. Inoltre,
-#           non è necessario che le venga specificato se lo stato iniziale deve essere presente o
+#           non ? necessario che le venga specificato se lo stato iniziale deve essere presente o
 #           assente, perche' lo capisce da sola analizzando il valore di w0: se questo e' NA, allora
 #           non considera lo stato iniziale. N.B.: dato che comunque nella generazione degli R sono
 #           richiesti dei valori per s0 e w0, questi verranno posti rispettivamente a 0 e a 1e-10.
-#           Nella funzione rav, I0 è ora posto a F per default. Inoltre, se I0=F, allora i valori di
+#           Nella funzione rav, I0 ? ora posto a F per default. Inoltre, se I0=F, allora i valori di
 #           s0 e w0 saranno restituiti pari a NA.
-#           La funzione outlier.remove è stata rinominata in outlier.replace, perché effettivamente
-#           non elimina gli outlier ma li sostituisce con un valore. Ora l'utente può passare come
+#           La funzione outlier.remove ? stata rinominata in outlier.replace, perch? effettivamente
+#           non elimina gli outlier ma li sostituisce con un valore. Ora l'utente pu? passare come
 #           valore da sostituire agli NA anche una funzione che, applicata per colonna, calcolera'
 #           da se' un valore da sistituire, diverso per ogni colonna della matrice. N.B.: l'argomento
 #           'value' prima era denominato 'replace'.

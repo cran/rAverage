@@ -37,7 +37,7 @@ int combin_length(int n)
 void combin(int *n, int *k, int *out)
 {
     // Inizializzazione variabili
-    int i,j,t;
+    int j,i=*k-1,t=-1;
     int h,pos,add;
     int sequence[*k], base[*k], origin[*k], stop[*k];
     for(j=0; j<*k; j++) {
@@ -48,33 +48,31 @@ void combin(int *n, int *k, int *out)
         stop[j] = *n-*k+1+j;
     }
     // Costruzione combinazioni
-    t = -1;
-    i = *k-1;
     while(sequence[0] < stop[0]) {
         for(j=0; j<*k; j++) {
-            t = t+1;
+            t++;
             sequence[j] = base[j];
             out[t] = sequence[j];
         }
         while(sequence[*k-1] < stop[*k-1]) {
             sequence[*k-1] = sequence[*k-1]+1;
             for(j=0; j<*k; j++) {
-                t = t+1;
+                t++;
                 out[t] = sequence[j];
             }
         }
         if(sequence[i]==stop[i]) {
-            i = i-1;
-            for(j=0; j<*k; j++)
-                base[j] = origin[j];
-            for(j=i; j<*k; j++)
-                base[j] = base[j]+1;
-        }
-        else {
-            h = 0;
-            for(j=*k-1; j>=i; j--) {
-                h = h + (sequence[j]==stop[j]);
+            i--;
+            for(j=0; j<*k; j++) {
+                if(j < i)
+                    base[j] = origin[j];
+                else
+                    base[j] = origin[j]+1;
             }
+        } else {
+            h = 0;
+            for(j=*k-1; j>=i; j--)
+                h = h + (sequence[j]==stop[j]);
             pos = *k-h-1;
             add = base[pos]+1;
             for(j=0; j<=h; j++)

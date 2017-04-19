@@ -125,23 +125,6 @@ parmeanlast <- function(param, fixed, sumlev, Dt, nwfix)
     )$param
 }
 
-# --------------------------------------
-# External functions
-# --------------------------------------
-
-# Costruisce, per un dato disegno sperimentale, una matrice
-# vuota (NA) da riempire con i dati da analizzare con rav.
-# da analizzare con rav.
-rav.grid <- function(lev,trials=1,subset=FALSE,names=NULL)
-{
-    all.resp <- respdim(lev)
-    mat <- data.frame(matrix(NA,nrow=trials,ncol=all.resp+subset))
-    col.names <- data.names(lev,names)
-    if(subset) col.names <- c("subset",col.names)
-    colnames(mat) <- col.names
-    return(mat)
-}
-
 # Crea una istanza della classe 'indices'.
 fit.indices <- function(output,data,lev,fact,sumlev,N,I0,dim.data,TSS,names,model,
     start=c(0,0),upper=c(0,0),lower=c(0,0),t.par)
@@ -183,9 +166,13 @@ fit.indices <- function(output,data,lev,fact,sumlev,N,I0,dim.data,TSS,names,mode
     new("indices",
         param=output$par, I0=I0, start=start, upper=upper, lower=lower,
         levels=lev, fitted=fitted, residuals=data-estim, AIC=Aic, BIC=Bic,
-        RSS=output$value, TSS=TSS, R2=R2, adjR2=adjR2, n.pars=output$n.pars,
+        N=N, RSS=output$value, TSS=TSS, R2=R2, adjR2=adjR2, n.pars=output$n.pars,
         t.par=t.par, title=c(title,"\n"), names=names, message=msg, model=model)
 }
+
+# --------------------------------------
+# External functions
+# --------------------------------------
 
 # Esegue lo stesso lavoro di fit.indices, pero' non viene invocata da rav()
 # ma da una chiamata diretta dell'utente.
@@ -247,6 +234,19 @@ rav.indices <- function(param,lev,data,t.par=FALSE,subset=NULL,n.pars=NULL,names
         model@param[wpos] <- exp(model@param[wpos])
     model@title <- c(title,"\n")
     return(model)
+}
+
+# Costruisce, per un dato disegno sperimentale, una matrice
+# vuota (NA) da riempire con i dati da analizzare con rav.
+# da analizzare con rav.
+rav.grid <- function(lev,trials=1,subset=FALSE,names=NULL)
+{
+    all.resp <- respdim(lev)
+    mat <- data.frame(matrix(NA,nrow=trials,ncol=all.resp+subset))
+    col.names <- data.names(lev,names)
+    if(subset) col.names <- c("subset",col.names)
+    colnames(mat) <- col.names
+    return(mat)
 }
 
 # Genera parametri random per il modello averaging.
@@ -354,12 +354,6 @@ rav.single <- function(data,...)
     return(output)
 }
 
-rav.fitted <- function(object, whichModel=NULL) {
-    if(is.null(whichModel))
-        whichModel <- slotNames(object)[-(1:10)][object@selection][1]
-    return(getElement(object,whichModel)@fitted)
-}
-
 standardized <- function(resid)
 {
     dim.data <- dim(resid)
@@ -371,58 +365,6 @@ standardized <- function(resid)
     s <- matrix(s,nrow=dim.data[1],ncol=dim.data[2],byrow=TRUE)
     resid <- (resid-m)/s
     return(resid)
-}
-
-rav.resid <- function(object, whichModel=NULL, standard=FALSE)
-{
-    if(is.null(whichModel))
-        whichModel <- c("null","ESM","SAM","EAM","DAM","IC")[object@selection[1]]
-    object <- getElement(object,whichModel)
-    resid <- object@residuals
-    if(standard)
-        resid <- standardized(resid)
-    resid <- list(
-        matrix = resid,
-        rows = apply(resid^2,1,mean,na.rm=TRUE),
-        columns = apply(resid^2,2,mean,na.rm=TRUE)
-    )
-    if(is.null(names(resid$rows)))
-        names(resid$rows) <- paste("row",1:length(resid$rows),sep="")
-    if(is.null(names(resid$columns)))
-        names(resid$columns) <- paste("col",1:length(resid$columns),sep="")
-    return(resid)
-}
-
-rav.param <- function(object, whichModel=NULL) {
-    if(is.null(whichModel))
-        whichModel <- c("null","ESM","SAM","EAM","DAM","IC")[object@selection[1]]
-    model <- getElement(object,whichModel)
-    param <- model@param
-    s.labels <- w.labels <- NULL
-    if(model@t.par)
-        type.par <- c("t0","t")
-    else
-        type.par <- c("w0","w")
-    for(k in 1:object@factors) {
-        s.labels <- c(s.labels,paste("s",LETTERS[k],1:object@levels[k],sep=""))
-        w.labels <- c(w.labels,paste(type.par[2],LETTERS[k],1:object@levels[k],sep=""))
-    }
-    names(param) <- c("s0",type.par[1],s.labels,w.labels)
-    return(param)
-}
-
-rav.AIC <- function(object, whichModel=NULL) {
-    if(is.null(whichModel))
-        whichModel <- slotNames(object)[-(1:10)][object@selection][1]
-    model <- slot(object,whichModel)
-    return(model@AIC)
-}
-
-rav.BIC <- function(object, whichModel=NULL) {
-    if(is.null(whichModel))
-        whichModel <- slotNames(object)[-(1:10)][object@selection][1]
-    model <- slot(object,whichModel)
-    return(model@BIC)
 }
 
 outlier.replace <- function(object, whichModel=NULL, alpha=0.05, value=NA)
@@ -447,8 +389,10 @@ outlier.replace <- function(object, whichModel=NULL, alpha=0.05, value=NA)
     return(object@observed)
 }
 
-rav2file <- function(object,what,whichModel=NULL,file=file.choose(),sep=",",dec=".")
+rav2file <- function(object,what=c("resid","param"),whichModel=NULL,file=file.choose(),sep=",",dec=".")
 {
+    what <- what[1]
+    what <- match.arg(what)
     if(!is.list(object)) {
         # nel caso object non sia risultato di rav.single
         all.resp <- respdim(object@levels)

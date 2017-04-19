@@ -10,6 +10,7 @@ setClass("indices",
         residuals="matrix",
         AIC="numeric",
         BIC="numeric",
+        N="numeric",
         RSS="numeric",
         TSS="numeric",
         R2="numeric",
@@ -116,9 +117,8 @@ setMethod("show","indices",
             # Nomi dei parametri:
             maxLev <- max(object@levels)
             labels <- list(s=NULL,w=NULL)
-            # I parametri, per essere stampati a video, devono essere trasformati in stringhe
-            # a uguale numero di caratteri. Questo è il numero di caratteri che deve possedere
-            # ogni stringa:
+            # I parametri, per essere stampati a video, devono essere trasformati in stringhe a
+            # uguale numero di caratteri. Questo e' il numero di caratteri che deve possedere ogni stringa:
             charStr <- max(nchar(as.integer(object@param))+3)
             # (+3 perche' ci sono da aggiungere i caratteri del punto e delle due cifre decimali)
             # Costruzione etichette:
@@ -202,7 +202,7 @@ setMethod("show","indices",
     }
 )
 
-setMethod("show","rav", 
+setMethod("show","rav",
     function(object) {
         cat("Parameter Estimation for Averaging Model\n")
         cat("Optimization algorithm:",object@method,"\n")
@@ -226,7 +226,7 @@ setMethod("show","rav",
     }
 )
 
-setMethod("summary","rav", 
+setMethod("summary","rav",
     function(object) {
         cat("Parameter Estimation for Averaging Model\n")
         cat("Minimization algorithm:",object@method,"\n")
@@ -247,6 +247,103 @@ setMethod("summary","rav",
         print(object@DAM); cat("\n")
         print(object@IC);  cat("\n")
         cat("Best Model(s):", modelNames[object@selection],"\n")
+    }
+)
+
+setMethod("coef","rav",
+    function(object, ...) {
+        whichModel <- list(...)$whichModel
+        if(is.null(whichModel))
+            whichModel <- c("null","ESM","SAM","EAM","DAM","IC")[object@selection[1]]
+        model <- getElement(object,whichModel)
+        param <- model@param
+        s.labels <- w.labels <- NULL
+        if(model@t.par)
+            type.par <- c("t0","t")
+        else
+            type.par <- c("w0","w")
+        for(k in 1:object@factors) {
+            s.labels <- c(s.labels,paste("s",LETTERS[k],1:object@levels[k],sep=""))
+            w.labels <- c(w.labels,paste(type.par[2],LETTERS[k],1:object@levels[k],sep=""))
+        }
+        names(param) <- c("s0",type.par[1],s.labels,w.labels)
+        return(param)
+    }
+)
+
+setMethod("fitted","rav",
+    function(object, ...) {
+        whichModel <- list(...)$whichModel
+        if(is.null(whichModel))
+            whichModel <- slotNames(object)[-(1:10)][object@selection][1]
+        return(getElement(object,whichModel)@fitted)
+    }
+)
+
+setMethod("residuals","rav",
+    function(object, ...) {
+        whichModel <- list(...)$whichModel
+        standard <- list(...)$standard
+        if(is.null(standard))
+            standard <- FALSE
+        if(is.null(whichModel))
+            whichModel <- c("null","ESM","SAM","EAM","DAM","IC")[object@selection[1]]
+        object <- getElement(object,whichModel)
+        resid <- object@residuals
+        if(standard)
+            resid <- standardized(resid)
+        #resid <- list(
+        #    matrix = resid,
+        #    rows = apply(resid^2,1,mean,na.rm=TRUE),
+        #    columns = apply(resid^2,2,mean,na.rm=TRUE)
+        #)
+        #if(is.null(names(resid$rows)))
+        #    names(resid$rows) <- paste("row",1:length(resid$rows),sep="")
+        #if(is.null(names(resid$columns)))
+        #    names(resid$columns) <- paste("col",1:length(resid$columns),sep="")
+        return(resid)
+    }
+)
+
+setMethod("AIC","rav",
+    function(object, ..., k=2) {
+        whichModel <- list(...)$whichModel
+        correct <- list(...)$correct
+        if(is.null(whichModel))
+            whichModel <- slotNames(object)[-(1:10)][object@selection][1]
+        if(is.null(correct) & k == 2) {
+            Aic <- slot(object,whichModel)@AIC
+        } else {
+            N <- slot(object,whichModel)@N
+            RSS <- slot(object,whichModel)@RSS
+            n.pars <- slot(object,whichModel)@n.pars
+            Aic <- N*log(RSS/N)+k*n.pars
+            if(is.null(correct))
+                correct <- N / n.pars < 40
+            if(isTRUE(correct))
+                Aic <- Aic + (n.pars*k*(n.pars+1))/(N-n.pars-1)
+        }
+        return(Aic)
+    }
+)
+
+setMethod("BIC","rav",
+    function(object, ...) {
+        whichModel <- list(...)$whichModel
+        correct <- list(...)$correct
+        if(is.null(whichModel))
+            whichModel <- slotNames(object)[-(1:10)][object@selection][1]
+        if(is.null(correct)) {
+            Bic <- slot(object,whichModel)@BIC
+        } else {
+            N <- slot(object,whichModel)@N
+            RSS <- slot(object,whichModel)@RSS
+            n.pars <- slot(object,whichModel)@n.pars
+            Bic <- N*log(RSS/N)+n.pars*log(N)
+            if(isTRUE(correct))
+                Bic <- Bic+(n.pars*log(N)*(n.pars+1))/(N-n.pars-1)
+        }
+        return(Bic)
     }
 )
 

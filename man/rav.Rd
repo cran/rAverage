@@ -175,9 +175,9 @@ rav( data, subset = NULL, mean = FALSE, lev, s.range = c(NA,NA),
 
 \value{
     An object of class \code{"rav"}. The method \code{summary} applied to the \code{rav}
-    object prints all the fitted models. The functions \code{fitted}, \code{residuals} and
-    \code{parameters} can be used to extract respectively fitted values \code{R}, the matrix
-    of residuals and the set of parameter estimated.
+    object prints all the fitted models. The functions \code{fitted.values}, \code{residuals} and
+    \code{coefficients} can be used to extract respectively fitted values (predicted responses), the
+    matrix of residuals and the set of estimated parameters.
 }
 
 \author{

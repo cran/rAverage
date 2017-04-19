@@ -1,5 +1,7 @@
 import(methods)
 import(tcltk)
+importFrom("stats", "optim", "qnorm", "rnorm", "runif", "sd")
+importFrom("utils", "write.table")
 export(
      rav,            # Parameter estimation for averaging models
      rav.single,     # Single subject analysis
@@ -7,13 +9,9 @@ export(
      pargen,         # Generate pseudorandom parameters for the averaging model
      rav.grid,       # Generate an empty matrix in 'rav' format
      rav.indices,    # Calculate the fit indexes
-     rav.AIC,        # Extract the Akaike Information Criterion
-     rav.BIC,        # Extract the Bayesian Information Criterion
-     rav.fitted,     # Extract the predicted values of the best model
-     rav.resid,      # Extract the residuals
-     rav.param,      # Extract the parameters
      rav2file,       # Export rav results
      outlier.replace # Detect and replace outliers
     )
 exportClasses(rav)
-exportMethods(summary,show)
+exportMethods(summary,show,coef,fitted,residuals,AIC,BIC)
+useDynLib(rAverage, .registration=TRUE)

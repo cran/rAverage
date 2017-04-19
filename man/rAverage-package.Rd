@@ -20,17 +20,17 @@
     \tabular{ll}{
         Package: \tab rAverage\cr
         Type: \tab Package\cr
-        Version: \tab 0.4-12\cr
-        Date: \tab 2015-01-12\cr
+        Version: \tab 0.5-3\cr
+        Date: \tab 2017-04-19\cr
         License: \tab GNU (version 2 or later)\cr
     }
     
     \emph{Functions of the R-Average package}:\cr
     
-    \code{rav}: parameter estimation for averaging models.\cr
-    \code{rav.fitted}: extracts the predicted values of the best model from a \code{rav} object.\cr
-    \code{rav.resid}: extracts the residuals from a \code{rav} object.\cr
-    \code{rav.param}: extracts the parameters from a \code{rav} object.\cr
+    \code{rav}: estimates the parameters for averaging models.\cr
+    \code{fitted}: extracts the predicted values of the best model from a \code{rav} object.\cr
+    \code{residuals}: extracts the residuals from a \code{rav} object.\cr
+    \code{coefficients}: extracts the parameters from a \code{rav} object.\cr
     \code{outlier.replace}: given an estimated averaging model with the \code{rav} function, it
                             detects and replace outliers from the residual matrix.
     \code{rav.indices}: given a set of parameters \code{s} and \code{w} and a matrix of observed

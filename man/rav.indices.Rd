@@ -1,33 +1,15 @@
 \name{rav.indices}
 \alias{rav.indices}
-\alias{rav.fitted}
-\alias{rav.param}
-\alias{rav.resid}
-\alias{rav.AIC}
-\alias{rav.BIC}
 
 \title{Fit indices for averaging models}
 
 \description{
-    Group of functions to extract fit indices, parameters, fitted values and residuals. The function
-    \code{fit.indices} returns the fit indices for the averaging model given the parameters
-    \code{s0}, \code{w0}, \code{s(k,j)}, and \code{w(k,j)}.
-    The functions \code{rav.AIC} and \code{rav.BIC} extract the Akaike Information Criterion and
-    the Bayesian Information Criterion from a fitted model.
-    The functions \code{rav.param}, \code{rav.fitted} and \code{rav.resid}, extract respectively the
-    parameters, fitted values and residuals from an estimated averaging model. The function
-    \code{rav.resid} extracts, besides the matrix of residuals, the sum of squared residuals for
-    both columns and rows of the data matrix.
-}
+    The function \code{fit.indices} returns the fit indices for the averaging model given the parameters
+    \code{s0}, \code{w0}, \code{s(k,j)}, and \code{w(k,j)}.}
 
 \usage{
 rav.indices(param, lev, data, t.par = FALSE, subset = NULL,
     n.pars = NULL, names = NULL, title = NULL)
-rav.AIC(object, whichModel = NULL)
-rav.BIC(object, whichModel = NULL)
-rav.fitted(object, whichModel = NULL)
-rav.param(object, whichModel = NULL)
-rav.resid(object, whichModel = NULL, standard = FALSE)
 }
 
 \arguments{
@@ -64,30 +46,11 @@ rav.resid(object, whichModel = NULL, standard = FALSE)
     \item{title}{
         Character specifying a title for the output.
     }
-    \item{object}{
-        An object of class \code{rav} containing an estimated averaging model.
-    }
-    \item{whichModel}{
-        Specifies from which model extract the values (parameters, fitted values or fit indices).
-        Options are:
-        \enumerate{
-            \item \code{"null"}: null model
-            \item \code{"ESM"}: equal scale values model
-            \item \code{"SAM"}: simple averaging model
-            \item \code{"EAM"}: equal-weights averaging model
-            \item \code{"DAM"}: differential-weight averaging model
-            \item \code{"IC"}: information criteria
-        }
-        As default, the values of the (first) best model will be extracted.
-    }
-    \item{standard}{
-        It specifies if to standardize residuals.
-    }
 }
 
 \details{
     Returns the main fit indices (AIC, BIC, R-squared, Adjusted R-squared), the estimated
-    parameters, the fitted values, the residuals and the squared residuals.
+    parameters, the fitted values and the residuals of an averaging model.
 }
 
 \value{
@@ -96,7 +59,6 @@ rav.resid(object, whichModel = NULL, standard = FALSE)
 
 \seealso{
     \code{\link[rAverage]{rav}},
-    \code{\link[rAverage]{outlier.replace}},
     \code{\link[rAverage]{rAverage-package}}
 }
 

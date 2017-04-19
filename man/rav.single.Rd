@@ -4,7 +4,8 @@
 \title{Single subject analysis with averaging models}
 
 \description{
-    Analyzes averaging models for every single subjects in a data matrix and store the estimated parameters in a list.
+    Analyzes averaging models for every single subjects in a data matrix and store the estimated
+    parameters in a list.
 }
 
 \usage{
@@ -31,8 +32,8 @@ rav.single(data,...)
 }
 
 \value{
-A \code{list} object in which each slot contains results of a single subject. The ordering of the
-subjects is the same as in the input data matrix.
+    A \code{list} object in which each slot contains results of a single subject. The ordering of
+    the subjects is the same as in the input data matrix.
 }
 
 \seealso{
