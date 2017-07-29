@@ -1,3 +1,8 @@
+# 0-5-8:    Aggiustamento file Description su segnalazione R Core Team.
+# 0.5-7:    Aggiustamento file Description su segnalazione R Core Team.
+# 0.5-6:    Aggiustamento bibliografia su segnalazione R Core Team.
+# 0.5-5:    Aggiustamento bibliografia su segnalazione R Core Team.
+# 0.5-4:    Sistemato bug nella presentazione dei modelli in ambiente Windows.
 # 0.5-3:    Aggiunta la registrazione delle routine C secondo nuovi standard.
 # 0-5-2:    Ottimizzati alcuni passaggi funzione C combin.
 # 0.5-1:    Corretta descrizione del pacchetto nel file description.

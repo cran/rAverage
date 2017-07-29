@@ -119,7 +119,7 @@ setMethod("show","indices",
             labels <- list(s=NULL,w=NULL)
             # I parametri, per essere stampati a video, devono essere trasformati in stringhe a
             # uguale numero di caratteri. Questo e' il numero di caratteri che deve possedere ogni stringa:
-            charStr <- max(nchar(as.integer(object@param))+3)
+            charStr <- max(nchar(as.integer(object@param[!is.na(object@param)]))+3)
             # (+3 perche' ci sono da aggiungere i caratteri del punto e delle due cifre decimali)
             # Costruzione etichette:
             ladd <- substr(empty,1,charStr-2)
@@ -151,7 +151,7 @@ setMethod("show","indices",
                 }
             }
             
-            # Il comando sprintf lavorara in modo diverso a seconda che il parametro
+            # Il comando sprintf lavora in modo diverso a seconda che il parametro
             # sia un numero oppure un NA. Bisogna utilizzare due diverse regole di stampa:
             printRuleNA <- paste("%",charStr,"s",sep="")
             printRule <- paste("%",charStr,".2f",sep="")

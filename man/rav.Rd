@@ -185,7 +185,6 @@ rav( data, subset = NULL, mean = FALSE, lev, s.range = c(NA,NA),
     
     University of Padova, Department of General Psychology\cr
     QPLab: Quantitative Psychology Laboratory
-    \url{http://qplab.psy.unipd.it/}
     
     \bold{version 0.0}:\cr
     Marco Vicentini \email{marco.vicentini@gmail.com}
@@ -199,35 +198,35 @@ rav( data, subset = NULL, mean = FALSE, lev, s.range = c(NA,NA),
     Akaike, H. (1976). Canonical correlation analysis of time series and the use
     of an information criterion. In: R. K. Mehra & D. G. Lainotis (Eds.),
     \emph{System identification: Advances and case studies} (pp. 52-107). New
-    York: Academic Press.
+    York: Academic Press. doi: 10.1016/S0076-5392(08)60869-3
     
     Anderson, N. H. (1981). \emph{Foundations of Information Integration Theory}.
-    New York: Academic Press.
+    New York: Academic Press. doi: 10.2307/1422202
     
     Anderson, N. H. (1982). \emph{Methods of Information Integration Theory}. New
     York: Academic Press.
     
     Anderson, N. H. (1991). Contributions to information integration theory:
     volume 1: cognition. Lawrence Erlbaum Associates, Hillsdale, New Jersey.
+    doi: 10.2307/1422884
     
     Anderson, N. H. (2007). Comment on article of Vidotto and Vicentini.
     \emph{Teorie & Modelli}, Vol. 12 (1-2), 223-224.
     
     Byrd, R. H., Lu, P., Nocedal, J., & Zhu, C. (1995). A limited memory algorithm
-    for bound constrained optimization. \emph{Journal Scientific Computing}, 16, 1190-1208.
+    for bound constrained optimization. \emph{Journal Scientific Computing}, 16,
+    1190-1208. doi: 10.1137/0916069
     
     Kuha, J. (2004). AIC and BIC: Comparisons of Assumptions and Performance.
     \emph{Sociological Methods & Research}, 33 (2), 188-229.
     
     Nelder, J. A., & Mead, R. (1965). A Simplex Method for Function Minimization.
-    \emph{The Computer Journal, 7, 308-313}.
+    \emph{The Computer Journal, 7, 308-313}. doi: 10.1093/comjnl/7.4.308
     
-    Vidotto, G. (2011). Note on differential weight averaging models in Functional
-    Measurement. Quality and Quantity, on line first, DOI: 10.1007/s11135-011-9567-1.
- 
     Vidotto, G., Massidda, D., & Noventa, S. (2010). Averaging models: parameters
     estimation with the R-Average procedure. \emph{Psicologica}, 31, 461-475.
- 
+    URL https://www.uv.es/psicologica/articulos3FM.10/3Vidotto.pdf
+    
     Vidotto, G. & Vicentini, M. (2007). A general method for parameter
     estimation of averaging models. \emph{Teorie & Modelli}, Vol. 12 (1-2), 211-221.
 }

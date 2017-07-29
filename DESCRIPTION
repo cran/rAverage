@@ -1,6 +1,6 @@
 Package: rAverage
-Version: 0.5-3
-Date: 2017-04-19
+Version: 0.5-8
+Date: 2017-07-29
 Title: Parameter Estimation for the Averaging Model of Information
         Integration Theory
 Author: Giulio Vidotto <giulio.vidotto@unipd.it>,
@@ -9,10 +9,9 @@ Author: Giulio Vidotto <giulio.vidotto@unipd.it>,
     Marco Vicentini <marco.vicentini@gmail.com>
 Maintainer: Davide Massidda <davide.massidda@gmail.com>
 Depends: R (>= 2.8), methods, tcltk
-Description: Functions to estimate parameters of averaging models of Anderson's Information Integration Theory.
+Description: Implementation of the R-Average method for parameter estimation of averaging models of the Anderson's Information Integration Theory by Vidotto, G., Massidda, D., & Noventa, S. (2010) <https://www.uv.es/psicologica/articulos3FM.10/3Vidotto.pdf>.
 License: GPL (>= 2)
-URL: http://qplab.psy.unipd.it/
 NeedsCompilation: yes
-Packaged: 2017-04-19 06:13:25 UTC; davide
+Packaged: 2017-07-29 15:17:17 UTC; davide
 Repository: CRAN
-Date/Publication: 2017-04-19 08:11:49 UTC
+Date/Publication: 2017-07-29 15:28:29 UTC

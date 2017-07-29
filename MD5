@@ -1,11 +1,11 @@
 d32239bcb673463ab874e80d47fae504 *COPYING
-31ef6cbe71859cebbd96889ca1f433c5 *DESCRIPTION
+7518ec5f6cc95f967bca63ea09477030 *DESCRIPTION
 aa85f432491f93213202a41ad84d676e *NAMESPACE
-594a2581e83c92d7adeab6a5c01e13ce *R/classes.methods.R
+6ea0bedd3bcc89d5c5d2822a30e7223b *R/classes.methods.R
 6eca8cbfc15ab661d882df586d30129f *R/fixparam.R
 1855c7c37cb9444766b9af6d756603b5 *R/fun.rav.R
 593061263e405a7c484f30c0b69ebd5a *R/optim.rav.R
-e934f41777ad90c144f9e7e6b3faf739 *R/rAverage.R
+9cbbf1c56942e3e0e42c2980b30924d8 *R/rAverage.R
 e9a1b2072c8119b18b7f69dfa0d0d451 *R/rav.R
 dc68c364a0f94862fc339f6127d73b8f *R/rav.cmd.R
 ac5e238d5730b79123e843177993d7b9 *data/fmdata1.rda
@@ -20,8 +20,8 @@ a8c7bc04c909f8075f92748cca35bb69 *man/fmdata1.Rd
 3f02163b88df4c631bd2bd3669b6013b *man/outlier.replace.Rd
 28f3e5bbedcba658d093823b691c1c6e *man/pargen.Rd
 af322bbf1ec7b9310bdec0882b740774 *man/pasta.Rd
-4b79120f3005a78d961b019bf6048228 *man/rAverage-package.Rd
-fc83c02d11b234cf5df5de53b84847a8 *man/rav.Rd
+af272ec140fd22c5a8438c6342a16e40 *man/rAverage-package.Rd
+bc24883b5d20a1bc79683324d915429e *man/rav.Rd
 7b7f592bb1833048ae383c357ad714ff *man/rav.grid.Rd
 dfab89e58e40ab479138f5ba3c563bef *man/rav.indices.Rd
 5eaab2f58e7af8de96b5c80afacce61c *man/rav.single.Rd
